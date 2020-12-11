@@ -1,0 +1,169 @@
+---
+title: "FinalProjectMyers"
+author: "Chloe Myers"
+date: "12/4/2020"
+output: html_document
+---
+
+```{r}
+datLipids<-bdnf_b1to3_26may2020
+#Imported dataset with lipids and BDNF by project/batch and changed name (I can't show this data)
+```
+
+```{r}
+install.packages("psych")
+library(psych)
+install.packages ("truncnorm")
+library (truncnorm)
+#Installing packages that I will need
+```
+
+```{r}
+describeBy(datLipids$BDNFngmL,datLipids$project)
+#First I am looking at my actual data and getting descriptives on BDNF levels by project type (CAP vs LTS)
+set.seed(117)
+#Setting the seed so that the data can be reproduced when looked at
+CAP<-rtruncnorm(300, 3, 165, 30.80, 11.39)
+LTS<-rtruncnorm(300, 3, 165, 31.57, 12.08)
+#Now I am simulating data based on the descriptives using a truncated r norm function that will create a normal distribution. Normal BDNF values range from 3-80 ngml, I chose 165 so I can clean the data by removing outliers
+datSimProject<-cbind.data.frame(CAP, LTS)
+#Combining the two new projects and their data into one dataset
+```
+
+```{r}
+datSimProject$CAP[datSimProject$CAP > 80]<- NA 
+#I am labeling any CAP BDNF value that is over 80 as NA
+datSimProject$LTS[datSimProject$LTS > 80]<- NA 
+#I am labeling any LTS BDNF value that is over 80 as NA
+datSimProject <- datSimProject[complete.cases(datSimProject), ] 
+# only keep non-NA cases in entire dataframe
+```
+
+```{r}
+#Making graphs of BDNF data in each project
+library(ggplot2)
+ggplot(datSimProject, aes(CAP)) + geom_histogram(color="salmon2", fill="thistle2")+ theme_classic()+ ylab("")
+ggplot(datSimProject, aes(LTS)) + geom_histogram(color="thistle2", fill="salmon2")+ theme_classic()+ ylab("")
+#Now I can see what the distributions of BDNF look like for both CAP and LTS
+```
+```{r}
+# Compute t-test to see if CAP and LTS differ
+ttest <- t.test(CAP, LTS, var.equal = TRUE)
+ttest
+#The two projects do not have statistically different values for BDNF (they shouldn't IRL)
+```
+```{r}
+describe(datLipids)
+#Now I am going back to my original file to look at total scores for BDNF and cholesterol, finding means/sd to simulate data
+set.seed(117)
+TotalChol<-rtruncnorm(600, 25, 492, 166.89, 58.95)
+HDL<-rtruncnorm(600, 5,186, 53.13, 21.31)
+LDL<-rtruncnorm(600, 10, 341, 96.69, 39.74)
+NonHDL<-rtruncnorm(600, 10, 400, 113.63, 47.30)
+Trig<-rtruncnorm(600, 11, 648, 103.17, 75.29)
+BDNF1<-rtruncnorm(600, 2, 75, 31.23, 11.78)
+#simulating new data for cholesterol and BDNF, 600 each, I truncated these based on the highest and lowest values in our actual dataset this time
+subject<-seq(1, 600, 1)
+#I am making a subject variable for the cholesterol and BDNF values, since there are 600 values I am making 600 subjects, 1-600 increasing by 1
+subject<-(subject)
+#Turning it into a vector? so I can add it into a data frame with the simulated 
+datSimLipids<-cbind.data.frame(TotalChol, HDL, LDL, NonHDL, Trig, BDNF1, subject)
+#Combining the lipids, bdnf and subject into one data frame
+```
+```{r}
+cor.test(datSimLipids$BDNF1, datSimLipids$TotalChol)
+cor.test(datSimLipids$BDNF1, datSimLipids$HDL)
+cor.test(datSimLipids$BDNF1, datSimLipids$LDL)
+cor.test(datSimLipids$BDNF1, datSimLipids$NonHDL)
+cor.test(datSimLipids$BDNF1, datSimLipids$Trig)
+#Looking at correlations between BDNF and different lipid measures
+#The only significant correlation is between BDNF and triglycerides
+```
+
+```{r}
+#Making a scatterplot to visualize the relationship between BDNF and triglycerides
+install.packages ("ggpubr")
+library("ggpubr")
+ggscatter(datSimLipids, x = "Trig", y = "BDNF1", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Triglycerides", ylab = "BDNF")
+```
+
+```{r}
+#Imported data set with sibling information
+datSiblings<-bdnfid_26may2020
+#Renamed the data set
+describeBy(datSiblings$BDNFngmL,datSiblings$sex)
+#Looking at descriptives for male and females so I can simulate that data
+set.seed(123)
+Female<-rtruncnorm(300, 3.88, 75.11, 32.11, 11.51)
+Male<-rtruncnorm(300, 2.8, 67.12, 30.22, 12.01)
+datSimSex<-cbind.data.frame(Female, Male)
+```
+
+```{r}
+#I'm making graphs of each sex's scores
+ggplot(datSimSex, aes(Female)) + geom_histogram(color="thistle2", fill="thistle2")+ theme_classic()+ ylab("BDNF")
+ggplot(datSimSex, aes(Male)) + geom_histogram(color="lightsteelblue2", fill="lightsteelblue2")+ theme_classic()+ ylab("BDNF")
+```
+
+```{r}
+# Compute t-test to see if CAP and LTS differ
+ttest2 <- t.test(Female, Male, var.equal = TRUE)
+ttest2
+```
+```{r}
+#Looking at the descriptives on the white/nonwhite variable
+describeBy(datSiblings$BDNFngmL,datSiblings$white)
+set.seed(177)
+white<-rtruncnorm(300, 2.8, 75.11, 31.19, 11.66)
+nonwhite<-rtruncnorm(300, 5.1, 66.9, 31.7, 13.18)
+datSimWhite<-cbind.data.frame(white, nonwhite)
+ttest3 <- t.test(white, nonwhite, var.equal = TRUE)
+ttest3
+```
+
+
+```{r}
+library(tidyr)
+describe(datSiblings$cats_age)
+describeBy(datSiblings$cats_age,datSiblings$sex)
+#I am looking at the mean age and age range for both males and females
+set.seed(121)
+males<-rtruncnorm(300, 28, 49, 33, 4)
+females<-rtruncnorm(300, 28, 46, 33, 5)
+#I used the descriptives to simulate ages for 300 males and 300 females
+datSimAge<-cbind.data.frame(males, females)
+#Combing the males and females with their ages into a data frame
+datSimAge<- pivot_longer(datSimAge, cols=c("males", "females"), names_to= "Sex", values_to="Age")
+#I converted the data from wide to long so that it could be added in with my simulated lipid data
+datSimLipidsAge<-cbind.data.frame(datSimAge, datSimLipids)
+```
+
+```{r}
+#Regression looking at sex predicting BDNF
+lm1<-lm(BDNF1~Sex, data=datSimLipidsAge)
+summary(lm1)
+```
+```{r}
+mr<-lm(BDNF1~Sex + Age, data=datSimLipidsAge)
+summary(mr)
+```
+
+
+
+```{r}
+library(ggplot2)
+g<-ggplot(datSimLipidsAge, aes(BDNF1, Age))+ geom_point(color="salmon2", fill="thistle2")+ theme_classic()
+g
+```
+
+```{r}
+g+facet_wrap(~Sex)
+```
+
+
+
+
+
