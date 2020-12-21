@@ -1,0 +1,18 @@
+Hi! 
+See below for comments from Jake and I. We’re happy to chat about any questions you have. Thanks for a great quarter and have a nice break! 
+Amanda
+
+Code Book Comments: 
+I like that you used the readme file option on Github and that you included an “about” section. 
+Overall, your explanations were clear. I would consider adding a range of potential values for variables like triglycerides.  
+
+Code Comments: 
+Awesome! 
+If you plan on knitting your file (to html or pdf), I would remove any “install.packages” from the .Rmd file to the console. They’ll give you an error if you try to knit with them. Additionally, because you only have to install them once, you may accidentally cause your R session to restart (getting lots of errors for no reason). 
+I would also consider commenting out your code for the actual dataset. Because we don’t have it, those pieces won’t run, and may confuse people you share the code with.
+Your commented code was easy to follow
+
+
+Grade: Pass
+
+
